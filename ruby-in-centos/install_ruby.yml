@@ -1,0 +1,51 @@
+---
+  - name: install EPEL repo needed by libyaml and some other package
+    yum: pkg=http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm
+      state=present
+    sudo: yes
+
+  - name: install dependencies to build Ruby and some gems
+    yum: pkg={{ item }} state=present
+    with_items:
+     - curl-devel
+     - gcc-c++
+     - git
+     - glibc-headers
+     - libffi-devel
+     - libxml2-devel
+     - libxslt-devel
+     - libyaml-devel
+     - openssl-devel
+     - openssl-devel
+     - readline
+     - readline-devel
+     - sqlite-devel
+     - zlib
+     - zlib-devel
+    sudo: yes
+
+  - debug: msg="Ruby Version {{ ruby_version }}"
+  - debug: msg="Ruby Gems Version {{ rubygems_version }}"
+
+  - name: Copying ruby installation script to /tmp
+    copy: src=ruby_install.sh dest=/tmp/ruby_install.sh
+
+  - name: Fetching gem ruby folder according ruby version
+    shell: "echo {{ ruby_version }} | sed s/./0/5"
+    register: ruby_gem_folder
+
+  - debug: msg="Ruby Gem Folder {{ ruby_gem_folder.stdout }}"
+
+  - name: install Ruby and RubyGem
+    shell: /tmp/ruby_install.sh {{ ruby_version }} {{ rubygems_version }}
+    args:
+     creates: /usr/local/bin/ruby
+    sudo: yes
+
+  - name: Include gemdir on $PATH
+    lineinfile: dest=/home/{{ user }}/.bash_profile
+                 regexp=^PATH=
+                 line=PATH=$PATH:$HOME/bin:$HOME/.gem/ruby/{{ruby_gem_folder.stdout}}/bin
+
+  - name: Delete tmp files from /tmp
+    file: path=/tmp/ruby_install.sh state=absent
