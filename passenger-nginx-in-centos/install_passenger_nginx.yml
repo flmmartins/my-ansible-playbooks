@@ -1,4 +1,8 @@
 ---
+ -  name: Installing wget which is necessary for some scripts
+    yum: pkg=wget state=present
+    sudo: yes
+
  -  name: Create /opt/nginx folder
     command: mkdir /opt/nginx
     sudo: yes

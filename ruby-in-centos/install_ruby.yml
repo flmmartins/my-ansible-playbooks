@@ -4,6 +4,10 @@
       state=present
     sudo: yes
 
+  - name: Installing wget which is necessary for some scripts
+    yum: pkg=wget state=present
+    sudo: yes
+
   - name: install dependencies to build Ruby and some gems
     yum: pkg={{ item }} state=present
     with_items:
