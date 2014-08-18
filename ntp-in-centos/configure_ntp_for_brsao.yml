@@ -1,0 +1,31 @@
+---
+- hosts: all
+  vars:
+    http_port: 80
+    max_clients: 200
+    remote_user: deploy
+  tasks:
+
+  - include: disable_selinux.yml
+
+  - name: Install ntp
+    yum: pkg=ntp state=present
+    sudo: yes
+
+  - name: Copying ntp.conf to /etc
+    copy: src=ntp.conf dest=/etc/ntp.conf mode=755
+    sudo: yes
+
+  - name: Force time sync
+    command: ntpdate 0.br.pool.ntp.org
+    sudo: yes
+
+  - name: The time was set to
+    command: date
+    register: date_output
+
+  - debug: msg="Date was set to {{ date_output.stdout }}"
+
+  - name: Starting ntp service and set it to boot
+    service: name=ntpd state=restarted enabled=yes
+    sudo: yes
