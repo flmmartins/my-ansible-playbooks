@@ -1,0 +1,57 @@
+---
+ -  name: Create /opt/nginx folder
+    command: mkdir /opt/nginx
+    sudo: yes
+    ignore_errors: yes
+
+  - name: Create /opt/passenger folder
+    command: mkdir /opt/passenger
+    sudo: yes
+    ignore_errors: yes
+
+  - name: Change permissions in /opt/nginx to be able to install passenger without su
+    command: chown {{user}} /opt/nginx
+    sudo: yes
+
+  - name: Change permissions in /opt/passenger to be able to install passenger withou
+    command: chown {{user}} /opt/passenger
+    sudo: yes
+
+  - name: Copy passenger instalation script - passenger_install.sh - to /tmp
+    copy: src=passenger_install.sh dest=/tmp/passenger_install.sh
+
+  - name: Run passenger_install.sh
+    shell: /tmp/passenger_install.sh
+    args:
+      creates: /opt/nginx/conf
+
+ - name: Create symlink for nginx
+   command: ln -s /opt/nginx/sbin/nginx /usr/bin/nginx
+   args:
+     creates: /usr/bin/nginx
+   sudo: yes
+
+ - name: Copying nginx.conf template to /tmp
+   copy: src=nginx.conf dest=/tmp/nginx.conf
+
+ - name: Copying setup_nginx script to /tmp
+   copy: src=setup_nginx.sh dest=/tmp/setup_nginx.sh
+
+ - debug: msg="Role for server {{ role }}"
+
+ - name: Run setup_nginx.conf - configure server name and folder name in nginx.conf
+   shell: /tmp/setup_nginx.sh {{ role }}
+   sudo: yes
+
+ - name: Create folder httpd to place certificates
+   command: mkdir /etc/pki/httpd
+   sudo: yes
+   ignore_errors: yes
+
+ - name: Start Nginx
+   command: nginx
+   sudo: yes
+
+ - name: Delete tmp files from /tmp
+   file: path=/tmp/setup_nginx.sh state=absent
+   file: path=/tmp/passenger_install.sh state=absent
