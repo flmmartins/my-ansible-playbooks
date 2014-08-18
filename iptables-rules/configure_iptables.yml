@@ -1,0 +1,15 @@
+----
+
+ - name: Copy firewall rules to /tmp
+   copy: src=iptables_rules.txt dest=/tmp/iptables_rules.txt
+
+ - name: Setup firewall rules
+   command: /sbin/iptables-restore /tmp/iptables_rules.txt
+   sudo: yes
+
+ - name: Save firewall rules
+   command: /sbin/iptables-save
+   sudo: yes
+
+ - name: Delete tmp files from /tmp
+   file: path=/tmp/iptables_rules.txt state=absent
