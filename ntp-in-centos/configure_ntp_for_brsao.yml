@@ -16,8 +16,12 @@
     copy: src=ntp.conf dest=/etc/ntp.conf mode=755
     sudo: yes
 
-  - name: Force time sync
-    command: ntpdate 0.br.pool.ntp.org
+  - name: Adjust timezone
+    command: ln -s -f /usr/share/zoneinfo/America/Sao_Paulo /etc/localtime
+    sudo: yes
+
+  - name: Starting ntp service and set it to boot
+    service: name=ntpd state=restarted enabled=yes
     sudo: yes
 
   - name: The time was set to
@@ -25,7 +29,3 @@
     register: date_output
 
   - debug: msg="Date was set to {{ date_output.stdout }}"
-
-  - name: Starting ntp service and set it to boot
-    service: name=ntpd state=restarted enabled=yes
-    sudo: yes
