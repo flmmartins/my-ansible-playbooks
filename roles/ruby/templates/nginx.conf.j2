@@ -1,0 +1,49 @@
+
+#user  nobody;
+worker_processes  1;
+
+#error_log logs/error.log debug;
+error_log  logs/error.log;
+#error_log  logs/error.log  notice;
+#error_log  logs/error.log  info;
+
+#pid        logs/nginx.pid;
+
+
+events {
+    worker_connections  1024;
+}
+
+
+http {
+    passenger_root /opt/passenger/passenger-{{ passenger_version }};
+    passenger_ruby /usr/local/bin/ruby;
+
+    include       mime.types;
+    default_type  application/octet-stream;
+
+    #access_log  logs/access.log  main;
+
+    sendfile        on;
+
+    keepalive_timeout  65;
+
+    # HTTPS server
+    server {
+	    listen 443;
+	    server_name {{ ansible_hostname }} www.{{ ansible_hostname }}; # Name of your server
+	    root {{ app_path }}/{{ deploy_server_role }}/public; # public folder of your application
+	    passenger_enabled on;
+
+	    ssl                  on;
+	    ssl_certificate      CERT
+	    ssl_certificate_key  CERT
+
+	    ssl_session_timeout  5m;
+
+	    ssl_protocols  SSLv2 SSLv3 TLSv1;
+	    ssl_ciphers  HIGH:!aNULL:!MD5;
+	    ssl_prefer_server_ciphers   on;
+   }
+
+}

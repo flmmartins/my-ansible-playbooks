@@ -1,0 +1,45 @@
+---
+- name: Install Dependency Packages
+  command:
+    yum install -y {{ dependency_packages }}
+  sudo: yes
+  
+- debug: msg="Ruby Version {{ ruby_version }}"
+- debug: msg="Ruby Gems Version {{ rubygems_version }}"
+
+- name: Fetching gem ruby folder according ruby version
+  shell:
+    "echo {{ ruby_version }} | sed s/./0/5"
+  register: ruby_gem_folder
+
+- debug:
+    msg="Ruby Gem Folder {{ ruby_gem_folder.stdout }}"
+
+- name: install Ruby and RubyGem
+  script:
+    ruby_install.sh {{ ruby_version }} {{ rubygems_version }}
+    creates=/usr/local/bin/ruby
+  sudo: yes
+  
+- name: Include gemdir on $PATH
+  lineinfile:
+    dest=/home/{{ user }}/.bashrc
+    state=present
+    insertafter=EOF
+    line=PATH=$PATH:$HOME/bin:$HOME/.gem/ruby/{{ruby_gem_folder.stdout}}/bin
+
+#  - name: Ensure that the PATH will be loaded everytime
+#    lineinfile: dest=/home/{{ remote_user }}/.bash_profile
+#                state=present
+#                insertbefore="^export PATH$"
+#                line="if [ -f ~/.bashrc ]; then source ~/.bashrc; fi"
+
+- name: Install bundler required for server deployment
+  gem:
+    name={{item}}
+    state=present
+    user_install=yes
+    executable=/usr/local/src/ruby-{{ ruby_version }}/bin/gem
+  with_items:
+    - bundler
+    - rack

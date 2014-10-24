@@ -1,0 +1,18 @@
+---
+- name: Create repo directory
+  file:
+    path={{ app_path }}
+    owner={{ user }}
+    state=directory
+  sudo: yes
+
+- name: Clone repo
+  git:
+    repo=
+    dest="{{app_path}}"
+    accept_hostkey=yes
+
+- name: Running bundle install for encrypter server
+  command:
+    bundle install --gemfile Gemfile --without development test
+    chdir="{{app_path}}"
