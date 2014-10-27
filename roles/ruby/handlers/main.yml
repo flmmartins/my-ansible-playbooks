@@ -1,9 +1,0 @@
-- name: stop nginx
-  command:
-    nginx -s stop
-    removes=/opt/nginx/logs/nginx.pid
-
-- name: start nginx
-  command:
-    nginx
-    creates=/opt/nginx/logs/nginx.pid

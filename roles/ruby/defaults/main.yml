@@ -1,4 +1,0 @@
-dependency_packages: "curl-devel gcc-c++ git glibc-headers libffi-devel libxml2-devel libxslt-devel libyaml-devel openssl-devel openssl-devel readline readline-devel sqlite-devel zlib zlib-devel wget man vim"
-ruby_version: 2.1.2
-rubygems_version: 2.3.0
-passenger_version: 4.0.53
